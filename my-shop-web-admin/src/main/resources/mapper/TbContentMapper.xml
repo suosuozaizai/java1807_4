@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.duo.my.shop.web.admin.com.duo.my.shop.web.ui.controller.dao.TbContentDao">
+    <sql id="tbContentColumns">
+         a.id,
+         a.title,
+         a.sub_title as subTitle,
+         a.title_desc as titleDesc,
+         a.url,
+         a.pic,
+         a.pic2,
+         a.content,
+         a.created,
+         a.updated,
+         b.id as "parent.id",
+         b.name as "parent.name"
+    </sql>
+    <sql id="TbContentJoins">
+         LEFT JOIN tb_content_category AS b ON a.category_id = b.id
+    </sql>
+
+    <select id="selectAll" resultType="TbContent">
+     SELECT
+         <include refid="tbContentColumns"/>
+    FROM
+      tb_content AS a
+      <include refid="TbContentJoins"/>
+    </select>
+
+    <select id="selectById" resultType="TbContent">
+       SELECT
+        <include refid="tbContentColumns"/>
+        FROM
+          tb_content AS a
+        <include refid="TbContentJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <insert id="insertTbContent">
+        INSERT INTO tb_content (
+          category_id,
+          title,
+          sub_title,
+          title_desc,
+          url,
+          pic,
+          pic2,
+          content,
+          created,
+          updated
+        )
+        VALUES
+          (
+               #{parent.id},
+               #{title},
+               #{subTitle},
+               #{titleDesc},
+               #{url},
+               #{pic},
+               #{pic2},
+               #{content},
+               #{created},
+               #{updated}
+          )
+    </insert>
+
+    <delete id="deleteById">
+        DELETE
+        FROM tb_content
+        WHERE id=#{id}
+    </delete>
+
+    <update id="updateTbContent">
+      UPDATE
+      tb_content
+         SET
+          category_id =#{parent.id},
+          title =#{title},
+          sub_title =#{subTitle},
+          title_desc =#{titleDesc},
+          url =#{url},
+          pic =#{pic},
+          pic2 =#{pic2},
+          content =#{content},
+          created =#{created},
+          updated =#{updated}
+        WHERE id =#{id}
+
+    </update>
+
+
+
+
+
+
+    <delete id="deleteTbContent">
+        DELETE FROM tb_content
+        WHERE id  IN
+        <foreach collection="array" open="(" close=")" item="id" separator=",">
+            #{id}
+        </foreach>
+
+    </delete>
+
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM tb_content AS a
+        <where>
+            <if test="title != null and title !=''">
+                AND a.title LIKE CONCAT ('%',#{title},'%')
+            </if>
+            <if test="subTitle != null and subTitle !=''">
+                AND a.sub_title LIKE CONCAT ('%',#{subTitle},'%')
+            </if>
+            <if test="titleDesc != null and titleDesc !=''">
+                AND a.title_desc LIKE CONCAT ('%',#{titleDesc},'%')
+            </if>
+        </where>
+    </select>
+
+
+    <select id="selectByPage" resultType="TbContent" parameterType="java.util.Map">
+        SELECT
+        <include refid="tbContentColumns"/>
+        FROM
+        tb_content as a
+        <include refid="TbContentJoins"/>
+        <where>
+            <if test="tbContent.title != null and tbContent.title != ''">
+                AND a.title LIKE CONCAT ('%',#{tbContent.title},'%')
+            </if>
+            <if test="tbContent.subTitle != null and tbContent.subTitle != ''">
+                AND a.sub_title LIKE CONCAT ('%',#{tbContent.subTitle},'%')
+            </if>
+            <if test="tbContent.titleDesc != null and tbContent.titleDesc != ''">
+                AND a.title_desc LIKE CONCAT ('%',#{tbContent.titleDesc},'%')
+            </if>
+        </where>
+        LIMIT #{start},#{length}
+    </select>
+
+
+
+</mapper>
